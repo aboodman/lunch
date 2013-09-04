@@ -9,8 +9,12 @@ window.addEventListener('load', function() {
     panControl: false,
     zoom: 13
   };
-  var map = new google.maps.Map(document.getElementById('map-canvas'),
+  var map = new google.maps.Map(document.querySelector('#map-canvas'),
                                 mapOptions);
 
-  var app = new FoodTruckApp(map, navigator.geolocation, console);
+  var searchbox = new google.maps.places.SearchBox(
+      document.querySelector('#query'));
+  searchbox.bindTo('bounds', map);
+
+  var app = new FoodTruckApp(map, searchbox, navigator.geolocation, console);
 });
