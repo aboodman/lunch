@@ -4,9 +4,10 @@ window.addEventListener('load', function() {
 
   var sfCoords = new google.maps.LatLng(37.7833, -122.4167);
   var mapOptions = {
-    zoom: 13,
     center: sfCoords,
-    mapTypeId: google.maps.MapTypeId.ROADMAP
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    panControl: false,
+    zoom: 13
   };
   var map = new google.maps.Map(document.getElementById('map-canvas'),
                                 mapOptions);
