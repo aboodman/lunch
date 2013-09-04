@@ -1,15 +1,15 @@
-// Enable the newer UI look
-google.maps.visualRefresh = true;
+window.addEventListener('load', function() {
+  // Enables a newer UI look in Google Maps.
+  google.maps.visualRefresh = true;
 
-function initialize() {
+  var sfCoords = new google.maps.LatLng(37.7833, -122.4167);
   var mapOptions = {
-    zoom: 8,
-    center: new google.maps.LatLng(-34.397, 150.644),
+    zoom: 13,
+    center: sfCoords,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
-
   var map = new google.maps.Map(document.getElementById('map-canvas'),
                                 mapOptions);
-}
 
-window.addEventListener('load', initialize);
+  var app = new FoodTruckApp(map, navigator.geolocation);
+});
