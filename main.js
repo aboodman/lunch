@@ -11,5 +11,5 @@ window.addEventListener('load', function() {
   var map = new google.maps.Map(document.getElementById('map-canvas'),
                                 mapOptions);
 
-  var app = new FoodTruckApp(map, navigator.geolocation);
+  var app = new FoodTruckApp(map, navigator.geolocation, console);
 });
