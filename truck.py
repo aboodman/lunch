@@ -49,8 +49,16 @@ def parseAllFromJSON(json):
 
 
 def serializeAllToJSON(trucks):
-  return None
+  result = []
+  for truck in trucks:
+    result.append([truck.name, truck.position.lat, truck.position.lon])
+  return result
 
 
-def getClosest(trucks, viewport):
-  return None
+# TODO(aa): Ideally this function would do something like take a viewport and
+# only return trucks within those bounds. If you center the map on the ocean,
+# the server should return no data I think.
+def getClosest(trucks, origin, quantity):
+  def distanceToOrigin(truck):
+    return truck.position.getDistanceTo(origin)
+  return sorted(trucks, key=distanceToOrigin)[0:quantity]
