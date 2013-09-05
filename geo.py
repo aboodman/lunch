@@ -1,12 +1,16 @@
 import math
 
 class Geoposition:
-  lat = 0
-  lon = 0
-
-  def __init__(self, lat = 0, lon = 0):
+  def __init__(self, lat = 0.0, lon = 0.0):
     self.lat = lat
     self.lon = lon
+
+  def __eq__(self, other):
+    if (self.lat != other.lat):
+      print 'lat ', self.lat, other.lat
+    if (self.lon != other.lon):
+      print 'lon'
+    return self.lat == other.lat and self.lon == other.lon
 
   def lat_rad(self):
     return math.radians(self.lat)
