@@ -59,6 +59,7 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
     var title = item[0];
     var lat = item[1];
     var lon = item[2];
+    var schedule = item[3];
 
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(lat, lon),
@@ -68,14 +69,28 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
     marker.setAnimation(google.maps.Animation.DROP);
     this._currentMarkers.push(marker);
 
-    var infoWindow = new google.maps.InfoWindow({ content: title });
     google.maps.event.addListener(
         marker, 'click',
-        this._handleMarkerClick.bind(this, infoWindow, marker));
+        this._handleMarkerClick.bind(this, marker, title, schedule));
   }.bind(this));
 };
 
-FoodTruckApp.prototype._handleMarkerClick = function(infoWindow, marker) {
+FoodTruckApp.prototype._handleMarkerClick = function(marker, title, schedule) {
+  // The maps API allows raw HTML to be used for the content property, but we
+  // don't do that here because it could lead to XSS if the data from the city
+  // is not carefully escaped.
+  var content = document.createElement('div');
+  content.className = 'infobubble-content';
+  var heading = document.createElement('h1');
+  heading.textContent = title;
+  var link = document.createElement('a');
+  link.href = schedule;
+  link.target = "_blank";
+  link.textContent = 'Schedule';
+  content.appendChild(heading);
+  content.appendChild(link);
+
+  var infoWindow = new google.maps.InfoWindow({ content: content });
   if (this._activeInfoWindow) {
     this._activeInfoWindow.close();
   }
