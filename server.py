@@ -13,7 +13,7 @@ import truck
 _trucks = []
 _last_update = datetime.fromtimestamp(0)
 _CACHE_DAYS = 1
-_MAX_RETURN_QUANTITY = 10
+_MAX_RETURN_QUANTITY = 50
 _FOOD_TRUCK_FEED = ('https://data.sfgov.org/api/views/rqzj-sfat/rows.json?'
                     'accessType=DOWNLOAD')
 
@@ -53,6 +53,6 @@ class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
   os.chdir('client')
   try:
-    SocketServer.TCPServer(("", 8088), FoodTruckHandler).serve_forever()
+    SocketServer.TCPServer(("", 8089), FoodTruckHandler).serve_forever()
   finally:
     os.chdir('../')
