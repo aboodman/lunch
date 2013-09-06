@@ -8,6 +8,7 @@ function FoodTruckApp(map, searchbox, geolocator, console) {
   this._console = console;
 
   this._currentMarkers = [];
+  this._activeInfoWindow = null;
   this._getClosestRequest = null;
 
   google.maps.event.addListener(searchbox, 'places_changed',
@@ -53,6 +54,7 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
 
   var data = JSON.parse(this._getClosestRequest.responseText);
   this._getClosestRequest = null;
+  var markerClickHandler = this._handleMarkerClick.bind(this);
   data.forEach(function(item) {
     var title = item[0];
     var lat = item[1];
@@ -67,10 +69,19 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
     this._currentMarkers.push(marker);
 
     var infoWindow = new google.maps.InfoWindow({ content: title });
-    google.maps.event.addListener(marker, 'click', function() {
-      infoWindow.open(this._map, marker);
-    });
+    google.maps.event.addListener(
+        marker, 'click',
+        this._handleMarkerClick.bind(this, infoWindow, marker));
   }.bind(this));
+};
+
+FoodTruckApp.prototype._handleMarkerClick = function(infoWindow, marker) {
+  if (this._activeInfoWindow) {
+    this._activeInfoWindow.close();
+  }
+
+  infoWindow.open(this._map, marker);
+  this._activeInfoWindow = infoWindow;
 };
 
 FoodTruckApp.prototype.autoposition = function() {
