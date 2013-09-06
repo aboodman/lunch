@@ -10,18 +10,18 @@ function FoodTruckApp(map, searchbox, geolocator, console) {
   this._currentMarkers = [];
   this._activeInfoWindow = null;
   this._getClosestRequest = null;
+  this._moveIdleTimer = -1;
 
   google.maps.event.addListener(searchbox, 'places_changed',
                                 this._handlePlacesChanged.bind(this));
+  google.maps.event.addListener(map, 'center_changed',
+                                this._handleCenterChanged.bind(this));
 
   this.autoposition();
 }
 
 FoodTruckApp.prototype._handlePlacesChanged = function() {
-  this._currentMarkers.forEach(function(m) {
-    m.setMap(null);
-  });
-  this._currentMarkers.length = 0;
+  this._clearMarkers();
 
   var places = this._searchbox.getPlaces();
   if (!places || !places.length) {
@@ -34,6 +34,29 @@ FoodTruckApp.prototype._handlePlacesChanged = function() {
   } else {
     this._map.setCenter(place.geometry.location);
   }
+};
+
+FoodTruckApp.prototype._clearMarkers = function() {
+  this._currentMarkers.forEach(function(m) {
+    m.setMap(null);
+  });
+  this._currentMarkers.length = 0;
+};
+
+FoodTruckApp.prototype._handleCenterChanged = function(isIdle) {
+  this._clearMarkers();
+
+  if (!isIdle) {
+    if (this._moveIdleTimer) {
+      window.clearTimeout(this._moveIdleTimer);
+    }
+
+    this._moveIdleTimer = window.setTimeout(
+        this._handleCenterChanged.bind(this, true), 1000);
+    return;
+  }
+
+  this._moveIdleTimer = null;
 
   if (this._getClosestRequest != null) {
     this._getClosestRequest.abort();
@@ -41,8 +64,8 @@ FoodTruckApp.prototype._handlePlacesChanged = function() {
 
   this._getClosestRequest = new XMLHttpRequest();
   this._getClosestRequest.open("GET",
-      "/get_closest?lat=" + place.geometry.location.lat() +
-      "&lon=" + place.geometry.location.lng(), true);
+      "/get_closest?lat=" + this._map.getCenter().lat() +
+      "&lon=" + this._map.getCenter().lng(), true);
   this._getClosestRequest.onload = this._handleGetClosestRequest.bind(this);
   this._getClosestRequest.send(null);
 };
