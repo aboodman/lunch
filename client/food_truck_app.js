@@ -77,28 +77,30 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
 
   var data = JSON.parse(this._getClosestRequest.responseText);
   this._getClosestRequest = null;
-  var markerClickHandler = this._handleMarkerClick.bind(this);
   data.forEach(function(item) {
     var title = item[0];
     var lat = item[1];
     var lon = item[2];
-    var schedule = item[3];
+    var description = item[3];
+    var schedule = item[4];
 
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(lat, lon),
       map: this._map,
-      title: title
+      title: title + '\n\n' + description
     });
     marker.setAnimation(google.maps.Animation.DROP);
     this._currentMarkers.push(marker);
 
     google.maps.event.addListener(
         marker, 'click',
-        this._handleMarkerClick.bind(this, marker, title, schedule));
+        this._handleMarkerClick.bind(this, marker, title, description,
+                                     schedule));
   }.bind(this));
 };
 
-FoodTruckApp.prototype._handleMarkerClick = function(marker, title, schedule) {
+FoodTruckApp.prototype._handleMarkerClick = function(marker, title,
+						     description, schedule) {
   // The maps API allows raw HTML to be used for the content property, but we
   // don't do that here because it could lead to XSS if the data from the city
   // is not carefully escaped.
@@ -106,11 +108,14 @@ FoodTruckApp.prototype._handleMarkerClick = function(marker, title, schedule) {
   content.className = 'infobubble-content';
   var heading = document.createElement('h1');
   heading.textContent = title;
+  var descriptionElm = document.createElement('p');
+  descriptionElm.textContent = description;
   var link = document.createElement('a');
   link.href = schedule;
   link.target = "_blank";
   link.textContent = 'Schedule';
   content.appendChild(heading);
+  content.appendChild(descriptionElm);
   content.appendChild(link);
 
   var infoWindow = new google.maps.InfoWindow({ content: content });

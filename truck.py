@@ -1,9 +1,11 @@
 import geo
 
 class Truck:
-  def __init__(self, name = '', position = 0.0, schedule_url = ''):
+  def __init__(self, name = '', position = 0.0, description = '',
+               schedule_url = ''):
     self.name = name
     self.position = position
+    self.description = description
     self.schedule_url = schedule_url
 
   def __repr__(self):
@@ -21,6 +23,7 @@ def parseAllFromJSON(json):
     'applicant': -1,
     'latitude': -1,
     'longitude': -1,
+    'fooditems': -1,
     'schedule': -1,
   }
 
@@ -38,6 +41,7 @@ def parseAllFromJSON(json):
     applicant = row[field_indicies['applicant']]
     latitude = row[field_indicies['latitude']]
     longitude = row[field_indicies['longitude']]
+    description = row[field_indicies['fooditems']]
     schedule = row[field_indicies['schedule']]
 
     if (latitude == '' or latitude == None or
@@ -45,7 +49,7 @@ def parseAllFromJSON(json):
       continue
 
     position = geo.Geoposition(float(latitude), float(longitude))
-    truck = Truck(applicant, position, schedule)
+    truck = Truck(applicant, position, description, schedule)
     result.append(truck)
 
   return result
@@ -55,7 +59,7 @@ def serializeAllToJSON(trucks):
   result = []
   for truck in trucks:
     result.append([truck.name, truck.position.lat, truck.position.lon,
-                   truck.schedule_url])
+                   truck.description, truck.schedule_url])
   return result
 
 
