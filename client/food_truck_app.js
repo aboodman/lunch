@@ -78,45 +78,36 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
   var data = JSON.parse(this._getClosestRequest.responseText);
   this._getClosestRequest = null;
   data.forEach(function(item) {
-    var title = item[0];
-    var lat = item[1];
-    var lon = item[2];
-    var description = item[3];
-    var schedule = item[4];
-
     var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(lat, lon),
+      position: new google.maps.LatLng(item.location.geopos.lat,
+                                       item.location.geopos.lon),
       map: this._map,
-      title: title + '\n\n' + description
+      title: item.location.name + '\n\n' + item.location.description
     });
     marker.setAnimation(google.maps.Animation.DROP);
     this._currentMarkers.push(marker);
 
     google.maps.event.addListener(
         marker, 'click',
-        this._handleMarkerClick.bind(this, marker, title, description,
-                                     schedule));
+        this._handleMarkerClick.bind(this, marker, item));
   }.bind(this));
 };
 
-FoodTruckApp.prototype._handleMarkerClick = function(marker, title,
-						     description, schedule) {
+FoodTruckApp.prototype._handleMarkerClick = function(marker, item) {
   // The maps API allows raw HTML to be used for the content property, but we
   // don't do that here because it could lead to XSS if the data from the city
   // is not carefully escaped.
   var content = document.createElement('div');
   content.className = 'infobubble-content';
   var heading = document.createElement('h1');
-  heading.textContent = title;
+  heading.textContent = item.location.name;
   var descriptionElm = document.createElement('p');
-  descriptionElm.textContent = description;
-  var link = document.createElement('a');
-  link.href = schedule;
-  link.target = "_blank";
-  link.textContent = 'Schedule';
+  descriptionElm.textContent = item.location.description;
+  var hours = document.createElement('b');
+  hours.textContent = item.start_time + ' - ' + item.end_time;
   content.appendChild(heading);
   content.appendChild(descriptionElm);
-  content.appendChild(link);
+  content.appendChild(hours);
 
   var infoWindow = new google.maps.InfoWindow({ content: content });
   if (this._activeInfoWindow) {
