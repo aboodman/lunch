@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 import json
 import os
 import SimpleHTTPServer
@@ -18,6 +19,12 @@ _MAX_RETURN_QUANTITY = 25
 
 _appearances = []
 _last_update = datetime.fromtimestamp(0)
+
+
+def _get_pst_now():
+  # Totally awful (and non-DST aware) hack. I think the right solution is to use
+  # http://pytz.sourceforge.net/, but ... blech.
+  return datetime.utcnow() - timedelta(hours=7)
 
 
 class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -41,7 +48,7 @@ class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       map(truck.Appearance.to_json,
           truck.get_closest(_appearances,
                             geo.Geoposition(lat, lon),
-                            datetime.now().time(),
+                            _get_pst_now().time(),
                             _MAX_RETURN_QUANTITY)))
 
     self.wfile.write(response)
@@ -49,7 +56,7 @@ class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def _update_cache(self):
     global _last_update
     global _appearances
-    now = datetime.now()
+    now = _get_pst_now()
     if (now.weekday() == _last_update.weekday()):
       return
 
