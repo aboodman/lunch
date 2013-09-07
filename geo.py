@@ -6,11 +6,13 @@ class Geoposition:
     self.lon = lon
 
   def __eq__(self, other):
-    if (self.lat != other.lat):
-      print 'lat ', self.lat, other.lat
-    if (self.lon != other.lon):
-      print 'lon'
-    return self.lat == other.lat and self.lon == other.lon
+    if isinstance(other, self.__class__):
+      return self.__dict__ == other.__dict__
+    else:
+      return False
+
+  def __ne__(self, other):
+    return not self.__eq__(other)
 
   def lat_rad(self):
     return math.radians(self.lat)
@@ -18,7 +20,7 @@ class Geoposition:
   def lon_rad(self):
     return math.radians(self.lon)
 
-  def getDistanceTo(self, other):
+  def distance_to(self, other):
     EARTH_RADIUS_KM = 6371
     return math.acos(math.sin(self.lat_rad()) * math.sin(other.lat_rad()) +
                      math.cos(self.lat_rad()) * math.cos(other.lat_rad()) *
