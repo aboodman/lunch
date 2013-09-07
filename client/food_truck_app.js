@@ -11,7 +11,6 @@ function FoodTruckApp(map, searchbox, geolocator, console, params) {
   this._currentMarkers = {};
   this._activeInfoWindow = null;
   this._getClosestRequest = null;
-  this._moveIdleTimer = -1;
 
   google.maps.event.addListener(searchbox, 'places_changed',
                                 this._handlePlacesChanged.bind(this));
@@ -44,19 +43,7 @@ FoodTruckApp.prototype._clearMarkers = function() {
   this._currentMarkers = {};
 };
 
-FoodTruckApp.prototype._handleCenterChanged = function(isIdle) {
-  if (!isIdle) {
-    if (this._moveIdleTimer) {
-      window.clearTimeout(this._moveIdleTimer);
-    }
-
-    this._moveIdleTimer = window.setTimeout(
-        this._handleCenterChanged.bind(this, true), 1000);
-    return;
-  }
-
-  this._moveIdleTimer = null;
-
+FoodTruckApp.prototype._handleCenterChanged = function() {
   if (this._getClosestRequest != null) {
     this._getClosestRequest.abort();
   }
@@ -160,6 +147,6 @@ FoodTruckApp.prototype.autoposition = function() {
     this._map.setCenter(pos);
   }.bind(this), function() {
     this._console.log('User denied access to geolocation.');
-    this._handleCenterChanged(true);
+    this._handleCenterChanged();
   }.bind(this));
 };
