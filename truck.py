@@ -30,13 +30,15 @@ class Location:
 
 
 class Appearance:
-  def __init__(self, location = None, start_time = '', end_time = ''):
+  def __init__(self, uid = 0, location = None, start_time = '', end_time = ''):
+    self.uid = uid
     self.location = location
     self.start_time = start_time
     self.end_time = end_time
 
   def to_json(self):
     return {
+      'uid': self.uid,
       'location': self.location.to_json(),
       'start_time': [
         self.start_time.hour,
@@ -129,7 +131,8 @@ def parse_appearances(schedule_json, day_index, location_map):
     appearance_data = (location_id, start_time, end_time)
     if (not appearance_data in seen_appearances):
       seen_appearances.add(appearance_data)
-      result.append(Appearance(location,
+      result.append(Appearance(row[columns[':sid']],
+                               location,
                                parse_time(start_time),
                                parse_time(end_time)))
 

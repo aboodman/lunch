@@ -37,8 +37,8 @@ FoodTruckApp.prototype._handlePlacesChanged = function() {
 };
 
 FoodTruckApp.prototype._clearMarkers = function() {
-  for (name in this._currentMarkers) {
-    this._currentMarkers[name].setMap(null);
+  for (var uid in this._currentMarkers) {
+    this._currentMarkers[uid].setMap(null);
   }
   this._currentMarkers = {};
 };
@@ -67,7 +67,7 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
   var data = JSON.parse(this._getClosestRequest.responseText);
   this._getClosestRequest = null;
   data.forEach(function(item) {
-    if (this._currentMarkers[item.location.name])
+    if (this._currentMarkers[item.uid])
       return;
 
     var marker = new google.maps.Marker({
@@ -78,7 +78,7 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
     });
 
     marker.setAnimation(google.maps.Animation.DROP);
-    this._currentMarkers[item.location.name] = marker;
+    this._currentMarkers[item.uid] = marker;
 
     google.maps.event.addListener(
         marker, 'click',
