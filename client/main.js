@@ -1,3 +1,18 @@
+function parseQueryString(qs) {
+  var parsed = {};
+  if (qs == '') {
+    return parsed;
+  }
+
+  qs = qs.split('&');
+  for (var i = 0; i < qs.length; i++) {
+    qs[i] = qs[i].split('=');
+    parsed[qs[i][0]] = qs[i][1];
+  }
+
+  return parsed;
+}
+
 window.addEventListener('load', function() {
   // Enables a newer UI look in Google Maps.
   google.maps.visualRefresh = true;
@@ -17,5 +32,7 @@ window.addEventListener('load', function() {
   searchbox.bindTo('bounds', map);
   input.focus();
 
-  var app = new FoodTruckApp(map, searchbox, navigator.geolocation, console);
+  var hashQuery = parseQueryString(location.hash.substring(1));
+  var app = new FoodTruckApp(map, searchbox, navigator.geolocation, console,
+			     hashQuery);
 });

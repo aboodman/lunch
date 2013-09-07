@@ -40,6 +40,13 @@ class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     params = urlparse.parse_qs(qs)
     lat = float(params['lat'][0])
     lon = float(params['lon'][0])
+
+    now = params.get('now')
+    if not now is None:
+      now = truck.parse_time(now[0])
+    else:
+      now = _get_pst_now().time()
+
     self.send_response(200)
     self.send_header('Content-type', 'application/json')
     self.end_headers()
@@ -48,7 +55,7 @@ class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       map(truck.Appearance.to_json,
           truck.get_closest(_appearances,
                             geo.Geoposition(lat, lon),
-                            _get_pst_now().time(),
+                            now,
                             _MAX_RETURN_QUANTITY)))
 
     self.wfile.write(response)

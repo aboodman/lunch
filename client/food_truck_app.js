@@ -1,11 +1,12 @@
 /**
  * Top-level application.
  */
-function FoodTruckApp(map, searchbox, geolocator, console) {
+function FoodTruckApp(map, searchbox, geolocator, console, params) {
   this._map = map;
   this._searchbox = searchbox;
   this._geolocator = geolocator;
   this._console = console;
+  this._params = params;
 
   this._currentMarkers = {};
   this._activeInfoWindow = null;
@@ -60,10 +61,14 @@ FoodTruckApp.prototype._handleCenterChanged = function(isIdle) {
     this._getClosestRequest.abort();
   }
 
+  var url = "/get_closest?lat=" + this._map.getCenter().lat() +
+      "&lon=" + this._map.getCenter().lng();
+  if (this._params['now']) {
+    url += "&now=" + this._params['now'];
+  }
+
   this._getClosestRequest = new XMLHttpRequest();
-  this._getClosestRequest.open("GET",
-      "/get_closest?lat=" + this._map.getCenter().lat() +
-      "&lon=" + this._map.getCenter().lng(), true);
+  this._getClosestRequest.open("GET", url, true);
   this._getClosestRequest.onload = this._handleGetClosestRequest.bind(this);
   this._getClosestRequest.send(null);
 };
