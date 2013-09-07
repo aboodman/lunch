@@ -15,7 +15,6 @@ _LOCATION_FEED = ('https://data.sfgov.org/api/views/rqzj-sfat/rows.json?'
                   'accessType=DOWNLOAD')
 _SCHEDULE_FEED = ('https://data.sfgov.org/api/views/jjew-r69b/rows.json?'
                   'accessType=DOWNLOAD')
-_MAX_RETURN_QUANTITY = 25
 
 _appearances = []
 _last_update = datetime.fromtimestamp(0)
@@ -29,18 +28,16 @@ def _get_pst_now():
 
 class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def do_GET(self):
-    if (self.path.startswith('/get_closest?')):
-      self.handle_get_closest()
+    if (self.path.startswith('/get_open')):
+      self.handle_get_open()
     else:
       SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
-  def handle_get_closest(self):
+  def handle_get_open(self):
     self._update_cache()
-    qs = self.path.split('?', 2)[1]
+    now = None
+    qs = self.path[self.path.find('?') + 1:]
     params = urlparse.parse_qs(qs)
-    lat = float(params['lat'][0])
-    lon = float(params['lon'][0])
-
     now = params.get('now')
     if not now is None:
       now = truck.parse_time(now[0])
@@ -53,10 +50,7 @@ class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     response = json.dumps(
       map(truck.Appearance.to_json,
-          truck.get_closest(_appearances,
-                            geo.Geoposition(lat, lon),
-                            now,
-                            _MAX_RETURN_QUANTITY)))
+          truck.get_open_at(_appearances, now)))
 
     self.wfile.write(response)
 

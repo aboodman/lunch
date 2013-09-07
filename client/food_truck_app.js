@@ -48,10 +48,9 @@ FoodTruckApp.prototype._handleCenterChanged = function() {
     this._getClosestRequest.abort();
   }
 
-  var url = "/get_closest?lat=" + this._map.getCenter().lat() +
-      "&lon=" + this._map.getCenter().lng();
+  var url = "/get_open";
   if (this._params['now']) {
-    url += "&now=" + this._params['now'];
+    url += "?now=" + this._params['now'];
   }
 
   this._getClosestRequest = new XMLHttpRequest();

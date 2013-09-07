@@ -110,7 +110,9 @@ def parse_time(time_str):
 def parse_appearances(schedule_json, day_index, location_map):
   columns = _get_columns(schedule_json)
 
+  seen_appearances = set()
   not_found_locations = set()
+
   result = []
   for row in schedule_json['data']:
     if day_index != int(row[columns['dayorder']]):
@@ -122,21 +124,22 @@ def parse_appearances(schedule_json, day_index, location_map):
       not_found_locations.add(location_id)
       continue
 
-    result.append(Appearance(location,
-                             parse_time(row[columns['start24']]),
-                             parse_time(row[columns['end24']])))
+    start_time = row[columns['start24']]
+    end_time = row[columns['end24']]
+    appearance_data = (location_id, start_time, end_time)
+    if (not appearance_data in seen_appearances):
+      seen_appearances.add(appearance_data)
+      result.append(Appearance(location,
+                               parse_time(start_time),
+                               parse_time(end_time)))
 
   print('Could not find %d locations: %s' %
         (len(not_found_locations), not_found_locations))
   return result
 
 
-def get_closest(appearances, origin, when, quantity):
-  def distance_to_origin(appearance):
-    return appearance.location.geopos.distance_to(origin)
-
+def get_open_at(appearances, when):
   def appearing_now(appearance):
     return appearance.start_time <= when and appearance.end_time >= when
 
-  return sorted(filter(appearing_now, appearances),
-                key=distance_to_origin)[0:quantity]
+  return filter(appearing_now, appearances)
