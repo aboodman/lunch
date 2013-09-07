@@ -130,11 +130,10 @@ FoodTruckApp.prototype._formatTime = function(time_tuple) {
   var minutes = time_tuple[1];
 
   var am = true;
-  if (hours > 12) {
+  if (hours > 11)
     am = false;
+  if (hours > 12)
     hours -= 12;
-  }
-
   if (hours == 0)
     hours = 12;
 
