@@ -5,16 +5,20 @@ html, body, #map-canvas {
 }
 
 #query {
+  left: 44px;
+  position: absolute;
+  right: 115px;
+  top: 4px;
+}
+
+#query>input {
   border: 1px solid #999;
   border-radius: 2px;
   box-shadow: 0px 0px 2px 2px rgba(40,40,40,0.1);
   font-size: 15px;
-  left: 44px;
   outline: 0;
   padding: 0.5em;
-  position: absolute;
-  right: 115px;
-  top: 4px;
+  width: 100%;
 }
 
 #query:focus {

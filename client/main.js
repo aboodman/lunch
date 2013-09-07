@@ -27,7 +27,7 @@ window.addEventListener('load', function() {
   var map = new google.maps.Map(document.querySelector('#map-canvas'),
                                 mapOptions);
 
-  var input = document.querySelector('#query');
+  var input = document.querySelector('#query>input');
   var searchbox = new google.maps.places.SearchBox(input);
   searchbox.bindTo('bounds', map);
   input.focus();
