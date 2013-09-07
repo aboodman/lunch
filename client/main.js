@@ -17,4 +17,6 @@ window.addEventListener('load', function() {
   searchbox.bindTo('bounds', map);
 
   var app = new FoodTruckApp(map, searchbox, navigator.geolocation, console);
+
+  document.querySelector('#query').focus();
 });
