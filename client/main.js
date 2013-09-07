@@ -7,7 +7,7 @@ window.addEventListener('load', function() {
     center: sfCoords,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     panControl: false,
-    zoom: 13
+    zoom: 14
   };
   var map = new google.maps.Map(document.querySelector('#map-canvas'),
                                 mapOptions);
