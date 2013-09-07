@@ -32,7 +32,14 @@ window.addEventListener('load', function() {
   searchbox.bindTo('bounds', map);
   input.focus();
 
-  var hashQuery = parseQueryString(location.hash.substring(1));
-  var app = new FoodTruckApp(map, searchbox, navigator.geolocation, console,
-			     hashQuery);
+  var app = new FoodTruckApp(map, searchbox, navigator.geolocation, console);
+  app.autoposition();
+
+  function handleHashChange() {
+    var hashQuery = parseQueryString(location.hash.substring(1));
+    app.load(hashQuery['now']);
+  }
+
+  window.addEventListener('hashchange', handleHashChange);
+  handleHashChange();
 });

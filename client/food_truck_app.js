@@ -14,52 +14,44 @@ function FoodTruckApp(map, searchbox, geolocator, console, params) {
 
   google.maps.event.addListener(searchbox, 'places_changed',
                                 this._handlePlacesChanged.bind(this));
-  google.maps.event.addListener(map, 'center_changed',
-                                this._handleCenterChanged.bind(this));
-
-  this.autoposition();
 }
 
-FoodTruckApp.prototype._handlePlacesChanged = function() {
-  this._clearMarkers();
-
-  var places = this._searchbox.getPlaces();
-  if (!places || !places.length) {
+FoodTruckApp.prototype.autoposition = function() {
+  if (!this._geolocator) {
+    this._console.log('No geolocator. Perhaps this browser doesn\'t support ' +
+                      'Geolocation');
     return;
   }
 
-  var place = places.shift();
-  if (place.geometry.viewport) {
-    this._map.fitBounds(place.geometry.viewport);
-  } else {
-    this._map.setCenter(place.geometry.location);
-  }
+  this._geolocator.getCurrentPosition(function(position) {
+    var pos = new google.maps.LatLng(position.coords.latitude,
+                                     position.coords.longitude);
+    this._map.setCenter(pos);
+  }.bind(this), function() {
+    this._console.log('User denied access to geolocation.');
+    this._handleCenterChanged();
+  }.bind(this));
 };
 
-FoodTruckApp.prototype._clearMarkers = function() {
-  for (var uid in this._currentMarkers) {
-    this._currentMarkers[uid].setMap(null);
-  }
-  this._currentMarkers = {};
-};
-
-FoodTruckApp.prototype._handleCenterChanged = function() {
+FoodTruckApp.prototype.load = function(opt_now) {
+  this._clearMarkers();
+  
   if (this._getClosestRequest != null) {
     this._getClosestRequest.abort();
   }
 
   var url = "/get_open";
-  if (this._params['now']) {
-    url += "?now=" + this._params['now'];
+  if (opt_now) {
+    url += "?now=" + opt_now;
   }
 
   this._getClosestRequest = new XMLHttpRequest();
   this._getClosestRequest.open("GET", url, true);
-  this._getClosestRequest.onload = this._handleGetClosestRequest.bind(this);
+  this._getClosestRequest.onload = this._handleGetOpen.bind(this);
   this._getClosestRequest.send(null);
 };
 
-FoodTruckApp.prototype._handleGetClosestRequest = function() {
+FoodTruckApp.prototype._handleGetOpen = function() {
   if (this._getClosestRequest.status != 200) {
     return;
   }
@@ -84,6 +76,27 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
         marker, 'click',
         this._handleMarkerClick.bind(this, marker, item));
   }.bind(this));
+};
+
+FoodTruckApp.prototype._clearMarkers = function() {
+  for (var uid in this._currentMarkers) {
+    this._currentMarkers[uid].setMap(null);
+  }
+  this._currentMarkers = {};
+};
+
+FoodTruckApp.prototype._handlePlacesChanged = function() {
+  var places = this._searchbox.getPlaces();
+  if (!places || !places.length) {
+    return;
+  }
+
+  var place = places.shift();
+  if (place.geometry.viewport) {
+    this._map.fitBounds(place.geometry.viewport);
+  } else {
+    this._map.setCenter(place.geometry.location);
+  }
 };
 
 FoodTruckApp.prototype._handleMarkerClick = function(marker, item) {
@@ -131,21 +144,4 @@ FoodTruckApp.prototype._formatTime = function(time_tuple) {
   var period = am ? "AM" : "PM";
 
   return hours + ":" + minutes + " " + period;
-};
-
-FoodTruckApp.prototype.autoposition = function() {
-  if (!this._geolocator) {
-    this._console.log('No geolocator. Perhaps this browser doesn\'t support ' +
-                      'Geolocation');
-    return;
-  }
-
-  this._geolocator.getCurrentPosition(function(position) {
-    var pos = new google.maps.LatLng(position.coords.latitude,
-                                     position.coords.longitude);
-    this._map.setCenter(pos);
-  }.bind(this), function() {
-    this._console.log('User denied access to geolocation.');
-    this._handleCenterChanged();
-  }.bind(this));
 };
