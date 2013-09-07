@@ -7,7 +7,7 @@ function FoodTruckApp(map, searchbox, geolocator, console) {
   this._geolocator = geolocator;
   this._console = console;
 
-  this._currentMarkers = [];
+  this._currentMarkers = {};
   this._activeInfoWindow = null;
   this._getClosestRequest = null;
   this._moveIdleTimer = -1;
@@ -37,15 +37,13 @@ FoodTruckApp.prototype._handlePlacesChanged = function() {
 };
 
 FoodTruckApp.prototype._clearMarkers = function() {
-  this._currentMarkers.forEach(function(m) {
-    m.setMap(null);
-  });
-  this._currentMarkers.length = 0;
+  for (name in this._currentMarkers) {
+    this._currentMarkers[name].setMap(null);
+  }
+  this._currentMarkers = {};
 };
 
 FoodTruckApp.prototype._handleCenterChanged = function(isIdle) {
-  this._clearMarkers();
-
   if (!isIdle) {
     if (this._moveIdleTimer) {
       window.clearTimeout(this._moveIdleTimer);
@@ -78,14 +76,18 @@ FoodTruckApp.prototype._handleGetClosestRequest = function() {
   var data = JSON.parse(this._getClosestRequest.responseText);
   this._getClosestRequest = null;
   data.forEach(function(item) {
+    if (this._currentMarkers[item.location.name])
+      return;
+
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(item.location.geopos.lat,
                                        item.location.geopos.lon),
       map: this._map,
       title: item.location.name + '\n\n' + item.location.description
     });
+
     marker.setAnimation(google.maps.Animation.DROP);
-    this._currentMarkers.push(marker);
+    this._currentMarkers[item.location.name] = marker;
 
     google.maps.event.addListener(
         marker, 'click',
