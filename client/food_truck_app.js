@@ -104,7 +104,8 @@ FoodTruckApp.prototype._handleMarkerClick = function(marker, item) {
   var descriptionElm = document.createElement('p');
   descriptionElm.textContent = item.location.description;
   var hours = document.createElement('b');
-  hours.textContent = item.start_time + ' - ' + item.end_time;
+  hours.textContent = this._formatTime(item.start_time) + ' - ' +
+    this._formatTime(item.end_time);
   content.appendChild(heading);
   content.appendChild(descriptionElm);
   content.appendChild(hours);
@@ -116,6 +117,27 @@ FoodTruckApp.prototype._handleMarkerClick = function(marker, item) {
 
   infoWindow.open(this._map, marker);
   this._activeInfoWindow = infoWindow;
+};
+
+FoodTruckApp.prototype._formatTime = function(time_tuple) {
+  var hours = time_tuple[0];
+  var minutes = time_tuple[1];
+
+  var am = true;
+  if (hours > 12) {
+    am = false;
+    hours -= 12;
+  }
+
+  if (hours == 0)
+    hours = 12;
+
+  minutes = String(minutes);
+  minutes = "00".substr(0, 2 - minutes.length) + minutes;
+
+  var period = am ? "AM" : "PM";
+
+  return hours + ":" + minutes + " " + period;
 };
 
 FoodTruckApp.prototype.autoposition = function() {
