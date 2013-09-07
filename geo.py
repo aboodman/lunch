@@ -20,6 +20,12 @@ class Geoposition:
   def lon_rad(self):
     return math.radians(self.lon)
 
+  def to_json(self):
+    return {
+      'lat': self.lat,
+      'lon': self.lon
+      }
+
   def distance_to(self, other):
     EARTH_RADIUS_KM = 6371
     return math.acos(math.sin(self.lat_rad()) * math.sin(other.lat_rad()) +

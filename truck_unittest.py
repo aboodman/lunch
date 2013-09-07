@@ -34,15 +34,7 @@ class TestTruck(unittest.TestCase):
 
       self.assertEquals(expected, appearances[0])
 
-#  def test_getClosest(self):
-#    with open('test_data.json') as test_data:
-#      data = json.load(test_data)
-#      parsed = truck.parseAllFromJSON(data)
-#      closest = truck.getClosest(parsed, geo.Geoposition(37.7833, -122.4167), 5)
-#      self.assertEquals(5, len(closest))
-#      self.assertEquals('Mang Hang Catering', closest[0].name)
-#      self.assertEquals('Walt\'s Catering', closest[-1].name)
-#
+  # TODO(aa): Test get_closest()
 
 if __name__ == '__main__':
   unittest.main()

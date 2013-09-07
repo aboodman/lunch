@@ -21,12 +21,32 @@ class Location:
   def __ne__(self, other):
     return not self.__eq__(other)
 
+  def to_json(self):
+    return {
+      'name': self.name,
+      'description': self.description,
+      'geopos': self.geopos.to_json()
+      }
+
 
 class Appearance:
   def __init__(self, location = None, start_time = '', end_time = ''):
     self.location = location
     self.start_time = start_time
     self.end_time = end_time
+
+  def to_json(self):
+    return {
+      'location': self.location.to_json(),
+      'start_time': [
+        self.start_time.hour,
+        self.start_time.minute
+        ],
+      'end_time': [
+        self.end_time.hour,
+        self.end_time.minute
+        ]
+      }
 
   def __repr__(self):
     return ('<Appearance(%s, %s, %s)>' %
@@ -90,9 +110,7 @@ def parse_time(time_str):
 def parse_appearances(schedule_json, day_index, location_map):
   columns = _get_columns(schedule_json)
 
-  seen_locations = set()
-  seen_names = set()
-
+  not_found_locations = set()
   result = []
   for row in schedule_json['data']:
     if day_index != int(row[columns['dayorder']]):
@@ -101,21 +119,24 @@ def parse_appearances(schedule_json, day_index, location_map):
     location_id = row[columns['locationid']]
     location = location_map.get(location_id)
     if location is None:
-      print 'Could not find locationid: %s' % location_id
+      not_found_locations.add(location_id)
       continue
 
-    seen_locations.add(location_id)
-    seen_names.add(location.name)
     result.append(Appearance(location,
                              parse_time(row[columns['start24']]),
                              parse_time(row[columns['end24']])))
+
+  print('Could not find %d locations: %s' %
+        (len(not_found_locations), not_found_locations))
   return result
 
-# TODO(aa): Ideally this function would do something like take a viewport and
-# only return trucks within those bounds. If you center the map on the ocean,
-# the server should return no data I think.
-# TODO(aa): Do we still need this now? How big is the entire dataset?
-#def get_closest(trucks, origin, quantity):
-#  def distanceToOrigin(truck):
-#    return truck.position.getDistanceTo(origin)
-#  return sorted(trucks, key=distanceToOrigin)[0:quantity]
+
+def get_closest(appearances, origin, when, quantity):
+  def distance_to_origin(appearance):
+    return appearance.location.geopos.distance_to(origin)
+
+  def appearing_now(appearance):
+    return appearance.start_time <= when and appearance.end_time >= when
+
+  return sorted(filter(appearing_now, appearances),
+                key=distance_to_origin)[0:quantity]

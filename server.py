@@ -10,12 +10,14 @@ import geo
 import truck
 
 
-_trucks = []
+_LOCATION_FEED = ('https://data.sfgov.org/api/views/rqzj-sfat/rows.json?'
+                  'accessType=DOWNLOAD')
+_SCHEDULE_FEED = ('https://data.sfgov.org/api/views/jjew-r69b/rows.json?'
+                  'accessType=DOWNLOAD')
+_MAX_RETURN_QUANTITY = 25
+
+_appearances = []
 _last_update = datetime.fromtimestamp(0)
-_CACHE_DAYS = 1
-_MAX_RETURN_QUANTITY = 50
-_FOOD_TRUCK_FEED = ('https://data.sfgov.org/api/views/rqzj-sfat/rows.json?'
-                    'accessType=DOWNLOAD')
 
 
 class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -34,25 +36,45 @@ class FoodTruckHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     self.send_response(200)
     self.send_header('Content-type', 'application/json')
     self.end_headers()
-    response = json.dumps(truck.serializeAllToJSON(
-        truck.getClosest(_trucks, geo.Geoposition(lat, lon),
-                         _MAX_RETURN_QUANTITY)))
+
+    response = json.dumps(
+      map(truck.Appearance.to_json,
+          truck.get_closest(_appearances,
+                            geo.Geoposition(lat, lon),
+                            datetime.now().time(),
+                            _MAX_RETURN_QUANTITY)))
+
     self.wfile.write(response)
 
   def _update_cache(self):
     global _last_update
-    global _trucks
+    global _appearances
     now = datetime.now()
-    if ((now - _last_update).days < _CACHE_DAYS):
+    if (now.weekday() == _last_update.weekday()):
       return
-    response = urllib2.urlopen(_FOOD_TRUCK_FEED).read()
-    _trucks = truck.parseAllFromJSON(json.loads(response))
+
+    #location_map = truck.parse_locations(
+    #  json.loads(urllib2.urlopen(_LOCATION_FEED).read()))
+
+    #_appearances = truck.parse_appearances(
+    #  json.loads(urllib2.urlopen(_SCHEDULE_FEED).read()),
+    #  now.isoweekday() % 7,
+    #  location_map)
+
+    with open('../test_data_locations.json') as test_data:
+      location_map = truck.parse_locations(json.load(test_data))
+
+    with open('../test_data_appearances.json') as test_data:
+     data = json.load(test_data)
+     _appearances = truck.parse_appearances(
+        data, now.isoweekday() % 7, location_map)
+
     _last_update = now
 
 
 if __name__ == '__main__':
   os.chdir('client')
   try:
-    SocketServer.TCPServer(("", 8089), FoodTruckHandler).serve_forever()
+    SocketServer.TCPServer(("", 8088), FoodTruckHandler).serve_forever()
   finally:
     os.chdir('../')
