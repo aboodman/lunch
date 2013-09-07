@@ -22,7 +22,7 @@ window.addEventListener('load', function() {
     center: sfCoords,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     panControl: false,
-    zoom: 14
+    zoom: 15
   };
   var map = new google.maps.Map(document.querySelector('#map-canvas'),
                                 mapOptions);

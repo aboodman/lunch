@@ -160,5 +160,6 @@ FoodTruckApp.prototype.autoposition = function() {
     this._map.setCenter(pos);
   }.bind(this), function() {
     this._console.log('User denied access to geolocation.');
+    this._handleCenterChanged(true);
   }.bind(this));
 };
